@@ -3,44 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torus with Lighting and Controls</title>
+    <title>Custom Three.js Rotating Torus</title>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body, html { margin: 0; padding: 0; overflow: hidden; }
+        #scene-container { width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
+    <div id="scene-container"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.min.js"></script>
     <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-        const geometry = new THREE.TorusGeometry(2, 0.5, 16, 100);
-        const material = new THREE.MeshPhongMaterial({ color: 0xff6347 });
-        const torus = new THREE.Mesh(geometry, material);
-        scene.add(torus);
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(0, 0, 10);
-        scene.add(light);
-        camera.position.z = 5;
-        function animate() {
-            requestAnimationFrame(animate);
-            torus.rotation.x += 0.01;
-            torus.rotation.y += 0.01;
-            controls.update();
-            renderer.render(scene, camera);
+        function main() {
+            const container = document.querySelector('#scene-container');
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);  
+            
+            const fov = 35;
+            const aspect = container.clientWidth / container.clientHeight;
+            const near = 0.1;
+            const far = 100;
+            const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+            camera.position.set(0, 0, 10);
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            
+            const geometry = new THREE.TorusGeometry(3, 1, 16, 100);
+            
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xFF6347,  // Tomato color
+                flatShading: true,
+            });
+            
+            const torus = new THREE.Mesh(geometry, material);
+            scene.add(torus);
+            
+            const light = new THREE.PointLight(0xFFFFFF, 1, 100);
+            light.position.set(0, 10, 10);
+            scene.add(light);
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                torus.rotation.x += 0.01;
+                torus.rotation.y += 0.005;
+                torus.rotation.z += 0.01;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
         }
-        animate();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        
+        main();
     </script>
 </body>
 </html>
